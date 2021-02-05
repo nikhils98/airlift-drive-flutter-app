@@ -1,5 +1,6 @@
 import 'package:airlift_drive/models/ride.dart';
 import 'package:airlift_drive/ui/common/common_drawer.dart';
+import 'package:airlift_drive/ui/common/elevated_text_field.dart';
 import 'package:airlift_drive/ui/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -45,18 +46,16 @@ class _HomeState extends State<Home> {
         children: [
           Container(
             padding: EdgeInsets.symmetric(vertical:10, horizontal: 20),
-            child: TextField(
+            child: ElevatedTextField(
+              hint: 'Search pick up location',
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchLocation())
                 );
               },
-              readOnly: true,
-              decoration: InputDecoration(
-                hintText: 'Search pick up location'
-              ),
-            ),
+              readonly: true,
+            )
           ),
           Container(
             alignment: Alignment.center,
