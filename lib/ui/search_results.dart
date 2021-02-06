@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:airlift_drive/common/server_constants.dart';
+import 'package:airlift_drive/common/drive_api_constants.dart';
+import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/models/mock_response.dart';
 import 'package:airlift_drive/models/ride.dart';
 import 'package:airlift_drive/ui/common/common_drawer.dart';
@@ -12,10 +13,16 @@ import 'common/elevated_text_field.dart';
 
 class SearchResults extends StatefulWidget {
 
-  SearchResults({Key key, @required this.origin, @required this.destination}): super(key: key);
+  SearchResults({
+    Key key,
+    @required this.origin,
+    @required this.destination,
+    @required this.distance,
+    @required this.duration
+  }): super(key: key);
 
-  final LatLng origin;
-  final LatLng destination;
+  final LocationDetails origin, destination;
+  final num distance, duration;
 
   @override
   _SearchResultsState createState() => _SearchResultsState();
@@ -51,12 +58,12 @@ class _SearchResultsState extends State<SearchResults> {
               children: [
                 ElevatedTextField(
                   readonly: true,
-                  hint: widget.origin.toString(),
+                  hint: widget.origin.name,
                 ),
                 Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: ElevatedTextField(
-                      hint: widget.destination.toString(),
+                      hint: widget.destination.name,
                       readonly: true,
                     )
                 ),

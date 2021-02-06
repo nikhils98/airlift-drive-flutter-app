@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:airlift_drive/common/server_constants.dart';
+import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/models/mock_response.dart';
 import 'package:airlift_drive/models/ride.dart';
 import 'package:flutter/material.dart';

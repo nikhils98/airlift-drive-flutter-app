@@ -1,7 +1,16 @@
+import 'dart:async';
+
 import 'package:airlift_drive/ui/login.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
+  /*
+  Timer.periodic(Duration(seconds: 5), (timer) async {
+      var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      print('${position.latitude}, ${position.longitude}');
+    });
+   */
   runApp(MyApp());
 }
 
