@@ -9,19 +9,22 @@ class ElevatedTextField extends StatelessWidget {
     this.readonly = false,
     this.onTap,
     this.onChanged,
-    this.focusNode
+    this.focusNode,
+    this.controller
   }): super(key: key);
 
   final String hint;
   final bool autoFocus, readonly;
   final Function onTap, onChanged;
   final FocusNode focusNode;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       elevation: 2,
       child: TextField(
+        controller: this.controller,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,

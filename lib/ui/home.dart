@@ -39,7 +39,8 @@ class _HomeState extends State<Home> {
       ),
       drawer: CommonDrawer(),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        backgroundColor: Colors.white,
+        child: Icon(Icons.add, color: Colors.black,),
         onPressed: () {},
       ),
       body: Column(
@@ -57,7 +58,7 @@ class _HomeState extends State<Home> {
               readonly: true,
             )
           ),
-          Container(
+          /*Container(
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text('Rides near you'),
@@ -87,7 +88,7 @@ class _HomeState extends State<Home> {
                 );
               }
             ),
-          )
+          )*/
         ],
       ),
     );
