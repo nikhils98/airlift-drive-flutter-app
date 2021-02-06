@@ -4,6 +4,9 @@ import 'dart:math';
 import 'package:airlift_drive/common/google_map_constants.dart';
 import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/ui/common/elevated_text_field.dart';
+import 'package:airlift_drive/ui/common/rides_list.dart';
+import 'package:airlift_drive/ui/create_ride.dart';
+import 'package:airlift_drive/ui/search_results.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -15,6 +18,17 @@ import 'package:google_maps_webservice/places.dart';
 import 'common/common_drawer.dart';
 
 class SearchLocation extends StatefulWidget {
+
+  SearchLocation({
+    Key key,
+    this.title = "Search",
+    this.originTextFieldHint = 'Search pick up location',
+    this.isCreateRide = false
+  }): super(key: key);
+
+  final String title, originTextFieldHint;
+  final bool isCreateRide;
+
   @override
   _SearchLocationState createState() => _SearchLocationState();
 }
@@ -61,7 +75,7 @@ class _SearchLocationState extends State<SearchLocation> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Search', style: TextStyle(color: Colors.white),),
+        title: Text(widget.title, style: TextStyle(color: Colors.white),),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -69,16 +83,39 @@ class _SearchLocationState extends State<SearchLocation> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        child: Icon(Icons.my_location_outlined, color: Colors.black,),
-        onPressed: () async {
-          (await mapController.future).animateCamera(CameraUpdate.newLatLng(
-            LatLng(this.currentLocation.latitude, this.currentLocation.longitude)
-          ));
-        },
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: null,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.my_location_outlined, color: Colors.grey[800],),
+            onPressed: () async {
+              (await mapController.future).animateCamera(CameraUpdate.newLatLng(
+                LatLng(this.currentLocation.latitude, this.currentLocation.longitude)
+              ));
+            },
+          ),
+          polylineCoordinates.length > 0 ? Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: FloatingActionButton(
+              heroTag: null,
+              child: Icon(Icons.arrow_forward_ios_outlined),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                    widget.isCreateRide ?
+                      CreateRide() :
+                      SearchResults(
+                        origin: selectedOrigin.coordinates,
+                        destination: selectedDestination.coordinates,
+                      )
+                ));
+              },
+            ),
+          ) : Container()
+        ],
       ),
-      drawer: CommonDrawer(),
       body: Stack(
         overflow: Overflow.clip,
         children: [
@@ -106,7 +143,7 @@ class _SearchLocationState extends State<SearchLocation> {
                 ElevatedTextField(
                   controller: this.originTextController,
                   autoFocus: true,
-                  hint: 'Search pick up location',
+                  hint: widget.originTextFieldHint,
                   focusNode: this.originFocusNode,
                   onChanged: (value) {
                     suggestions.clear();
