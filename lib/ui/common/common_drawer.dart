@@ -29,7 +29,6 @@ class CommonDrawer extends StatelessWidget {
                 Text('My Rides')
               ],
             ),
-            textColor: Colors.red,
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
             onPressed: () {
 
@@ -47,7 +46,6 @@ class CommonDrawer extends StatelessWidget {
                 Text('Logout')
               ],
             ),
-            textColor: Colors.red,
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
             onPressed: () {
               Navigator.pushAndRemoveUntil(

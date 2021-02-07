@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:airlift_drive/ui/login.dart';
+import 'package:airlift_drive/ui/ride_details.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 

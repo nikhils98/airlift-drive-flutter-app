@@ -277,7 +277,8 @@ class _SearchLocationState extends State<SearchLocation> {
     if(this.selectedOrigin.coordinates != null) {
       markers.add(Marker(
         markerId: sourceMarkerId,
-        position: this.selectedOrigin.coordinates
+        position: this.selectedOrigin.coordinates,
+        //icon: BitmapDescriptor
       ));
     }
     if(this.selectedDestination.coordinates != null) {

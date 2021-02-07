@@ -171,29 +171,28 @@ class _CreateRideState extends State<CreateRide> {
                           onSaved: (input) => this.maxPassengers = int.parse(input),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.only(top: 15),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Passenger preference ", style: TextStyle(fontSize: 16)),
-                              DropdownButton<String>(
-                                value: this.passengerPreference,
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.grey[350],
+                              Text("Passenger preference: ", style: TextStyle(fontSize: 16)),
+                              Container(
+                                width: 160,
+                                child: DropdownButtonFormField<String>(
+                                  value: this.passengerPreference,
+                                  onChanged: (String newValue) {
+                                    setState(() {
+                                      passengerPreference = newValue;
+                                    });
+                                  },
+                                  items: <String>["No preference", "Male", "Female"]
+                                      .map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
                                 ),
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    passengerPreference = newValue;
-                                  });
-                                },
-                                items: <String>["No preference", "Male", "Female"]
-                                    .map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
                               ),
                             ],
                           ),

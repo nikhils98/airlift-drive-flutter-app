@@ -34,6 +34,9 @@ dependencies:
   google_maps_webservice: ^0.0.19
   flutter_polyline_points: ^0.2.4
   intl: ^0.16.1
+  image_picker: ^0.6.7+22
+  dio: ^3.0.10
+  fluttertoast: ^7.1.6
 
 dev_dependencies:
   flutter_test:

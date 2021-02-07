@@ -8,6 +8,7 @@ import 'package:airlift_drive/ui/common/common_drawer.dart';
 import 'package:airlift_drive/ui/common/rides_list.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
 
 import 'common/elevated_text_field.dart';
 
@@ -82,11 +83,15 @@ class _SearchResultsState extends State<SearchResults> {
 
   setRides() async {
     var rides = List<Ride>();
-    var url = '$DRIVE_API_URL/rides?origin=destination=';
-    url = "https://reqres.in/api/users?page=2";
-    var response = MockResponse(); //await http.get(url);
-    await Future.delayed(Duration(seconds: 3));
-    response.body = '['
+    var url = '$DRIVE_API_URL/ride/suggestions';
+
+    var originArr = [widget.origin.coordinates.latitude, widget.origin.coordinates.longitude];
+    var destinationArr = [widget.destination.coordinates.latitude, widget.destination.coordinates.longitude];
+
+    var json = jsonEncode({"startLocation": originArr, "endLocation": destinationArr});
+    print(json);
+    var response = await post(url, headers: HEADERS, body: json);
+    /*response.body = '['
         '{'
         '"id": 1, '
         '"driverName": "Nikhil", '
@@ -94,14 +99,11 @@ class _SearchResultsState extends State<SearchResults> {
         '"origin": "a", '
         '"destination": "b"'
         '}'
-        ']';
-    if(response.statusCode == 200 ) {
+        ']';*/
+    if(response.statusCode == 201 ) {
       var body = jsonDecode(response.body);
       print(body);
-      var test = (body as List).map((e) => Ride.fromJson(e)).toList();
-      for(int i = 0; i < 10; i++) {
-        rides.add(test[0]);
-      }
+      rides = (body as List).map((e) => Ride.fromJson(e)).toList();
     }
     setState(() {
       this.rides = rides;
