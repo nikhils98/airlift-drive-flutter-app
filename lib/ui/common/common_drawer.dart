@@ -1,6 +1,7 @@
 import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/ui/credit.dart';
 import 'package:airlift_drive/ui/login.dart';
+import 'package:airlift_drive/ui/rides_joined_by_me.dart';
 import 'package:airlift_drive/ui/rides_scheduled_by_me.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,7 +77,7 @@ class CommonDrawer extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Credit())
+                    MaterialPageRoute(builder: (context) => RidesJoinedByMe())
                 );
               }
           ),

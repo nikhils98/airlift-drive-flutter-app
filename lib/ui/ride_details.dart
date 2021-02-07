@@ -7,6 +7,7 @@ import 'package:airlift_drive/common/google_map_constants.dart';
 import 'package:airlift_drive/common/util.dart';
 import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/models/ride.dart';
+import 'package:airlift_drive/models/ride_user.dart';
 import 'package:airlift_drive/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -47,6 +48,7 @@ class _RideDetailsState extends State<RideDetails> {
     super.initState();
     this.setCurrentLocation();
     this.setPolyLines();
+    this.getRideDetails();
   }
 
   var geodesy = geo.Geodesy();
@@ -62,11 +64,23 @@ class _RideDetailsState extends State<RideDetails> {
     mapController.complete(controller);
   }
 
+  var rideUsers = List<RideUser>();
+  getRideDetails() async {
+    var response = await get('$DRIVE_API_URL/ride/${widget.ride.id}', headers: HEADERS);
+    if(response.statusCode == 200) {
+      var json = jsonDecode(response.body);
+      var ride = Ride.fromJson(json);
+      setState(() {
+        this.rideUsers = ride.rideUsers;
+      });
 
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
+    var schedulesPassengers = rideUsers.where((element) => element.status != 'CANCELLED' && !element.isDriver);
 
     return Scaffold(
       appBar: AppBar(
@@ -79,10 +93,11 @@ class _RideDetailsState extends State<RideDetails> {
           },
         ),
       ),
-      floatingActionButton: Container(
+      floatingActionButton: this.rideUsers.isNotEmpty ? Container(
           padding: EdgeInsets.only(right: 15, left: 50),
           alignment: Alignment.bottomCenter,
-          child: !widget.isRideRegistered ? ActionButton(text: "Register In Ride", onPressed: () async {
+          child: !widget.isRideRegistered && !schedulesPassengers
+              .any((element) => element.userId == myInfo.id) ? ActionButton(text: "Register In Ride", onPressed: () async {
             //var json = jsonEncode({"status": "REQUESTED"});
 
             if(myInfo.alcs >= widget.ride.fare) {
@@ -111,18 +126,24 @@ class _RideDetailsState extends State<RideDetails> {
           },) :
           ActionButton(text: "Cancel", onPressed: () async {
             var json = jsonEncode({"status": "CANCELLED"});
-            var response = await put('${DRIVE_API_URL}/${widget.ride.id}/${myInfo.id}/status',
+            var response = await put('${DRIVE_API_URL}/ride/${widget.ride.id}/${myInfo.id}/status',
                 headers: HEADERS, body: json);
             print(response.statusCode);
-            if(response.statusCode == 201) {
+            print(response.body);
+            if(response.statusCode == 201 || response.statusCode == 200) {
               Fluttertoast.showToast(msg: "Cancelled");
               setState(() {
                 widget.isRideRegistered = false;
               });
             }
           },)
-      ),
-      body: GoogleMap(
+      ) : Container(),
+      body: rideUsers.isEmpty ?
+      Container(
+          alignment: Alignment.center,
+          child: CircularProgressIndicator()
+      ) :
+      GoogleMap(
        initialCameraPosition: CameraPosition(
            target: currentLocation ?? DEFAULT_LATLNG,
            zoom: 16

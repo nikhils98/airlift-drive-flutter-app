@@ -225,22 +225,27 @@ class _RegisterState extends State<Register> {
                   this.json["gender"] = this.gender;
 
                   var body = jsonEncode(this.json);
-                  var response = await post('$DRIVE_API_URL/auth/register', headers: HEADERS, body: body);
-                  
+                  var response = await post(
+                      '$DRIVE_API_URL/auth/register', headers: HEADERS,
+                      body: body);
+
                   print(response.statusCode);
                   print(response.body);
 
-                  showDialog(context: context, child:
+                  if (response.statusCode >= 200 && response.statusCode < 300) {
+                    showDialog(context: context, child:
                     AlertDialog(
                       title: Text("Successfully registered"),
-                      content: Icon(Icons.check_circle, color: Colors.green[600], size: 30,),
+                      content: Icon(Icons.check_circle,
+                        color: Colors.green[600], size: 30,),
                     )
-                  );
-                  await Future.delayed(Duration(seconds: 1));
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Login())
-                  );
+                    );
+                    await Future.delayed(Duration(seconds: 1));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Login())
+                    );
+                  }
                 }
               },),
             )

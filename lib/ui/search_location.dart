@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/common/google_map_constants.dart';
 import 'package:airlift_drive/common/util.dart';
 import 'package:airlift_drive/models/location_details.dart';
@@ -117,15 +118,25 @@ class _SearchLocationState extends State<SearchLocation> {
               backgroundColor: Colors.white,
               child: Icon(Icons.add, color: Colors.grey[800],),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                CreateRide(
-                    origin: selectedOrigin,
-                    destination: selectedDestination,
-                    distance: distance,
-                    duration: duration,
-                    route: polylineCoordinates
-                )
-                ));
+                if(myInfo.carModel == null || myInfo.carModel == '') {
+                  showDialog(context: context, child:
+                  AlertDialog(
+                      title: Text("Please Enter Your Car Details"),
+                      content: Icon(Icons.info, color: Colors.red, size: 30,)
+                  )
+                  );
+                } else {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) =>
+                      CreateRide(
+                          origin: selectedOrigin,
+                          destination: selectedDestination,
+                          distance: distance,
+                          duration: duration,
+                          route: polylineCoordinates
+                      )
+                  ));
+                }
               },
             ),
           ) : Container()

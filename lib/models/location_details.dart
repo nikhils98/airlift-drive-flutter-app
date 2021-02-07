@@ -8,6 +8,6 @@ class LocationDetails {
   LatLng coordinates;
 
   LocationDetails.fromJson(Map<String, dynamic> json)
-      : coordinates = LatLng(json['coordinates'][0] as double, json['coordinates'][1] as double),
-        name = json['name'];
+      : coordinates = json == null ? null : LatLng(json['coordinates'][0] as double, json['coordinates'][1] as double),
+        name = json == null ? null : json['name'];
 }

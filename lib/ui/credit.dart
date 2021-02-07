@@ -33,9 +33,9 @@ class _CreditState extends State<Credit> {
         child: Icon(Icons.add, color: Colors.grey[800],),
         onPressed: () async {
           var json = jsonEncode({"alcs": 500});
-          var response = await put('${DRIVE_API_URL}/user/${myInfo.id}', body: json);
+          var response = await put('${DRIVE_API_URL}/user/${myInfo.id}', headers: HEADERS, body: json);
           print (response.statusCode);
-          if(response.statusCode == 201) {
+          if(response.statusCode == 200 || response.statusCode == 201) {
             response = await get('${DRIVE_API_URL}/user/${myInfo.id}', headers: HEADERS);
             myInfo = User.fromJson(jsonDecode(response.body));
             Fluttertoast.showToast(msg: "500 ALCs added");

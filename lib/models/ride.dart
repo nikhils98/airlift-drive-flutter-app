@@ -1,4 +1,5 @@
 import 'package:airlift_drive/models/location_details.dart';
+import 'package:airlift_drive/models/ride_user.dart';
 import 'package:airlift_drive/models/user.dart';
 
 class Ride {
@@ -21,6 +22,7 @@ class Ride {
   List<User> currentPassengers;
   num distance;
   String passengerCount;
+  List<RideUser> rideUsers;
 
   Ride.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -34,5 +36,6 @@ class Ride {
         fare = json['perPassengerFare'],
         status = json['status'],
         driver = json["driver"] == null ? null : User.fromJson(json['driver']),
-        passengerCount = json['passengerCount'].toString();
+        passengerCount = json['passengerCount'].toString(),
+        rideUsers = json['rideUsers'] != null ? (json['rideUsers'] as List).map((e) => RideUser.fromJson(e)).toList() : null;
 }
