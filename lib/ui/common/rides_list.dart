@@ -15,17 +15,19 @@ import '../create_ride.dart';
 class RidesList extends StatelessWidget {
 
   RidesList({Key key, @required this.rides,
-    @required this.origin,
-    @required this.destination,
-    @required this.distance,
-    @required this.duration,
-    @required this.polyLineCoordinates
+    this.origin,
+    this.destination,
+    this.distance,
+    this.duration,
+    this.polyLineCoordinates,
+    this.scheduledByMe = false
   }): super(key: key);
 
   final List<Ride> rides;
   final LocationDetails origin, destination;
   final num distance, duration;
   List<LatLng> polyLineCoordinates;
+  bool scheduledByMe;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class RidesList extends StatelessWidget {
                           duration: duration, passengerCoordinates: this.polyLineCoordinates,)));
                   },
                   title: Container(padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Text('${ride.driver.firstName} ${ride.driver.lastName}')),
+                    child: Text(scheduledByMe ? '${myInfo.firstName} ${myInfo.lastName}' : '${ride.driver.firstName} ${ride.driver.lastName}')),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Column(
@@ -57,17 +59,17 @@ class RidesList extends StatelessWidget {
                         SizedBox(height: 5,),
                         Text('Destination: ${ride.destination.name}'),
                         SizedBox(height: 5,),
-                        Text('Contact: ${ride.driver.contact}'),
+                        Text('Contact:  ${scheduledByMe ? myInfo.contact : ride.driver.contact}'),
                         SizedBox(height: 5,),
                         Text('Start Time: ${dateTimeFormatter.format(ride.startTime)}'),
                         SizedBox(height: 5,),
                         Text('End Time: ${dateTimeFormatter.format(ride.endTime)}'),
                         SizedBox(height: 5,),
-                        Text('Available capacity: ${ride.maxPassengers - ride.passengerCount} / ${ride.maxPassengers}'),
+                        Text('Available capacity: ${ride.maxPassengers - int.parse(ride.passengerCount)} / ${ride.maxPassengers}'),
                         SizedBox(height: 5,),
                         Text("Fare: ${ride.fare}"),
                         SizedBox(height: 5,),
-                        Text("Car Model: ${ride.driver.carModel}")
+                        Text("Car Model: ${scheduledByMe ? myInfo.carModel : ride.driver.carModel}")
                       ],
                     ),
                   ),

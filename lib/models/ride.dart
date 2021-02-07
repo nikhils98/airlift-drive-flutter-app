@@ -20,7 +20,7 @@ class Ride {
   String status;
   List<User> currentPassengers;
   num distance;
-  int passengerCount;
+  String passengerCount;
 
   Ride.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -33,6 +33,6 @@ class Ride {
         maxPassengers = json['maxPassengers'],
         fare = json['perPassengerFare'],
         status = json['status'],
-        driver = User.fromJson(json['driver']),
-        passengerCount = json['passengerCount'];//(json['currentPassengers'] as List).map((e) => User.fromJson(e)).toList();
+        driver = json["driver"] == null ? null : User.fromJson(json['driver']),
+        passengerCount = json['passengerCount'].toString();
 }

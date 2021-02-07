@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/models/ride.dart';
+import 'package:airlift_drive/models/user.dart';
 import 'package:airlift_drive/ui/common/common_drawer.dart';
 import 'package:airlift_drive/ui/common/elevated_text_field.dart';
+import 'package:airlift_drive/ui/common/rides_list.dart';
 import 'package:airlift_drive/ui/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -13,6 +18,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  @override
+  void initState() {
+    super.initState();
+    this.getMyProfile();
+  }
+
+  getMyProfile() async {
+    var response = await get('${DRIVE_API_URL}/user/${myInfo.id}', headers: HEADERS);
+    myInfo = User.fromJson(jsonDecode(response.body));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +76,7 @@ class _HomeState extends State<Home> {
               readonly: true,
             )
           ),
-          SingleChildScrollView(
+          /*SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -69,7 +85,11 @@ class _HomeState extends State<Home> {
                   alignment: Alignment.topLeft,
                   child: Text("Rides scheduled by me"),
                 ),
-
+                ridesScheduledByMe.isEmpty ? Container(
+                  padding: EdgeInsets.all(20),
+                  alignment: Alignment.center,
+                  child: Text("No data"),
+                ) : RidesList(rides: ridesScheduledByMe),
                 Container(
                   padding: EdgeInsets.all(10),
                   alignment: Alignment.topLeft,
@@ -77,7 +97,7 @@ class _HomeState extends State<Home> {
                 )
               ],
             ),
-          )
+          )*/
         ],
       ),
     );

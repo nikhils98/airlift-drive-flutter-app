@@ -5,6 +5,7 @@ import 'package:airlift_drive/models/user.dart';
 import 'package:airlift_drive/ui/common/action_button.dart';
 import 'package:airlift_drive/ui/home.dart';
 import 'package:airlift_drive/ui/register.dart';
+import 'package:airlift_drive/ui/search_location.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -66,15 +67,17 @@ class _LoginState extends State<Login> {
 
                           var json = jsonDecode(response.body);
                           authToken = json['accessToken'];
+                          myInfo = User.fromJson(json);
                           int id = json['userID'] as int;
+                          myInfo.id = id;
 
-                          response = await get('${DRIVE_API_URL}/user/${id}', headers: HEADERS);
+                          response = await get('${DRIVE_API_URL}/user/${myInfo.id}', headers: HEADERS);
                           myInfo = User.fromJson(jsonDecode(response.body));
 
-                          if(response.statusCode == 200) {
+                          if(response.statusCode == 200 || response.statusCode == 201) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => Home())
+                              MaterialPageRoute(builder: (context) => SearchLocation())
                             );
                           }
                           else {

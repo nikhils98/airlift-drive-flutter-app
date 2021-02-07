@@ -74,14 +74,9 @@ class _SearchLocationState extends State<SearchLocation> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.title, style: TextStyle(color: Colors.white),),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text('Home', style: TextStyle(color: Colors.white),),
       ),
+      drawer: CommonDrawer(),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -100,17 +95,10 @@ class _SearchLocationState extends State<SearchLocation> {
             padding: const EdgeInsets.only(top: 10),
             child: FloatingActionButton(
               heroTag: null,
-              child: Icon(Icons.arrow_forward_ios_outlined),
+              backgroundColor: Colors.white,
+              child: Icon(Icons.arrow_forward_ios_outlined, color: Colors.grey[800],),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                    widget.isCreateRide ?
-                      CreateRide(
-                          origin: selectedOrigin,
-                          destination: selectedDestination,
-                          distance: distance,
-                          duration: duration,
-                          route: polylineCoordinates
-                      ) :
                       SearchResults(
                         origin: selectedOrigin,
                         destination: selectedDestination,
@@ -118,6 +106,25 @@ class _SearchLocationState extends State<SearchLocation> {
                         duration: duration,
                         polyLineCoordinates: this.polylineCoordinates,
                       )
+                ));
+              },
+            ),
+          ) : Container(),
+          polylineCoordinates.isNotEmpty ? Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: FloatingActionButton(
+              heroTag: null,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.add, color: Colors.grey[800],),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                CreateRide(
+                    origin: selectedOrigin,
+                    destination: selectedDestination,
+                    distance: distance,
+                    duration: duration,
+                    route: polylineCoordinates
+                )
                 ));
               },
             ),
@@ -143,6 +150,7 @@ class _SearchLocationState extends State<SearchLocation> {
             myLocationButtonEnabled: false,
             zoomGesturesEnabled: true,
             polylines: _polylines,
+            mapType: MapType.normal,
           ),
           Container(
             padding: EdgeInsets.symmetric(vertical:10, horizontal: 20),
@@ -300,7 +308,16 @@ class _SearchLocationState extends State<SearchLocation> {
       var result = await directions.directionsWithLocation(
         Location(selectedOrigin.coordinates.latitude, selectedOrigin.coordinates.longitude),
         Location(selectedDestination.coordinates.latitude, selectedDestination.coordinates.longitude),
-        travelMode: GoogleMapsWebservice.TravelMode.driving
+        travelMode: GoogleMapsWebservice.TravelMode.driving,
+        region: "pk"
+      );
+
+      var route = await
+      new PolylinePoints().getRouteBetweenCoordinates(
+          GOOGLE_API_KEY,
+          PointLatLng(selectedOrigin.coordinates.latitude, selectedOrigin.coordinates.longitude),
+          PointLatLng(selectedDestination.coordinates.latitude, selectedDestination.coordinates.longitude),
+        travelMode: PolyLinePointsEnum.TravelMode.driving
       );
 
       if (result.routes.isNotEmpty) {
@@ -314,7 +331,6 @@ class _SearchLocationState extends State<SearchLocation> {
         print(selectedOrigin.coordinates.toString());
         steps.forEach((element) {
           print(element.startLocation.toString());
-          print(element.endLocation.toString());
         });
         print(selectedDestination.coordinates.toString());
 
@@ -337,12 +353,24 @@ class _SearchLocationState extends State<SearchLocation> {
           this.distance = distance;
           polylineCoordinates.clear();
           polylineCoordinates.add(this.selectedOrigin.coordinates);
-          polylineCoordinates.addAll(steps.map((e) => LatLng(e.startLocation.lat, e.startLocation.lng)));
+          if(route.points.isNotEmpty){
+            // loop through all PointLatLng points and convert them
+            // to a list of LatLng, required by the Polyline
+            route.points.forEach((PointLatLng point){
+              polylineCoordinates.add(
+                  LatLng(point.latitude, point.longitude));
+            });
+          }
+          /*for(var step in steps) {
+            var start = LatLng(step.startLocation.lat, step.startLocation.lng);
+            polylineCoordinates.add(start);
+          }*/
+          //polylineCoordinates.addAll(steps.map((e) => LatLng(e.startLocation.lat, e.startLocation.lng)));
           polylineCoordinates.add(this.selectedDestination.coordinates);
           // create a Polyline instance
           // with an id, an RGB color and the list of LatLng pairs
           Polyline polyline = Polyline(
-              polylineId: PolylineId("poly"),
+              polylineId: PolylineId("polysearch"),
               color: Colors.red,
               width: 5,
               points: polylineCoordinates

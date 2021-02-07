@@ -7,6 +7,7 @@ import 'package:airlift_drive/common/google_map_constants.dart';
 import 'package:airlift_drive/common/util.dart';
 import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/models/ride.dart';
+import 'package:airlift_drive/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart' as geo;
@@ -61,6 +62,8 @@ class _RideDetailsState extends State<RideDetails> {
     mapController.complete(controller);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -76,25 +79,8 @@ class _RideDetailsState extends State<RideDetails> {
           },
         ),
       ),
-      body: Stack(
-        children: [
-         GoogleMap(
-          initialCameraPosition: CameraPosition(
-              target: currentLocation ?? DEFAULT_LATLNG,
-              zoom: 16
-          ),
-          zoomControlsEnabled: true,
-          zoomGesturesEnabled: true,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          onMapCreated: onMapCreated,
-          polylines: _polylines,
-          markers: markers,
-           mapType: MapType.normal,
-
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 100),
+      floatingActionButton: Container(
+          padding: EdgeInsets.only(right: 15, left: 50),
           alignment: Alignment.bottomCenter,
           child: !widget.isRideRegistered ? ActionButton(text: "Register In Ride", onPressed: () async {
             //var json = jsonEncode({"status": "REQUESTED"});
@@ -107,6 +93,8 @@ class _RideDetailsState extends State<RideDetails> {
                   headers: HEADERS, body: json);
               print(response.statusCode);
               if (response.statusCode == 201) {
+                var response = await get('${DRIVE_API_URL}/user/${myInfo.id}', headers: HEADERS);
+                myInfo = User.fromJson(jsonDecode(response.body));
                 Fluttertoast.showToast(msg: "Registered in ride");
                 setState(() {
                   widget.isRideRegistered = true;
@@ -114,20 +102,41 @@ class _RideDetailsState extends State<RideDetails> {
               }
             } else {
               showDialog(context: context, child:
-                AlertDialog(
-                    title: Text("You don't have enough credits"),
-                    content: Icon(Icons.info, color: Colors.red, size: 30,)
-                )
+              AlertDialog(
+                  title: Text("You don't have enough credits"),
+                  content: Icon(Icons.info, color: Colors.red, size: 30,)
+              )
               );
             }
           },) :
-              ActionButton(text: "Cancel", onPressed: () async {
-                var json = jsonEncode({"status": "CANCELLED"});
-                var response = await put('${DRIVE_API_URL}/${widget.ride.id}/${myInfo.id}/status',
-                    headers: HEADERS, body: json);
-              },)
-        )
-      ]),
+          ActionButton(text: "Cancel", onPressed: () async {
+            var json = jsonEncode({"status": "CANCELLED"});
+            var response = await put('${DRIVE_API_URL}/${widget.ride.id}/${myInfo.id}/status',
+                headers: HEADERS, body: json);
+            print(response.statusCode);
+            if(response.statusCode == 201) {
+              Fluttertoast.showToast(msg: "Cancelled");
+              setState(() {
+                widget.isRideRegistered = false;
+              });
+            }
+          },)
+      ),
+      body: GoogleMap(
+       initialCameraPosition: CameraPosition(
+           target: currentLocation ?? DEFAULT_LATLNG,
+           zoom: 16
+       ),
+       zoomControlsEnabled: false,
+       zoomGesturesEnabled: true,
+       myLocationEnabled: true,
+       myLocationButtonEnabled: false,
+       onMapCreated: onMapCreated,
+       polylines: _polylines,
+       markers: markers,
+        mapType: MapType.normal,
+
+        ),
     );
   }
 

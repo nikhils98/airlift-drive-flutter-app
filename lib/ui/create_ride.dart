@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/ui/home.dart';
+import 'package:airlift_drive/ui/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -257,7 +258,7 @@ class _CreateRideState extends State<CreateRide> {
                   await Future.delayed(Duration(seconds: 1));
                   Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Home())
+                      MaterialPageRoute(builder: (context) => SearchLocation())
                   );
                 }
               },),
