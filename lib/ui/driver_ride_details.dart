@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/common/google_map_constants.dart';
 import 'package:airlift_drive/common/util.dart';
 import 'package:airlift_drive/models/ride.dart';
+import 'package:airlift_drive/ui/common/action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
 
 class DriverRideDetails extends StatefulWidget {
 
@@ -20,12 +24,22 @@ class DriverRideDetails extends StatefulWidget {
 
 class _DriverRideDetailsState extends State<DriverRideDetails> {
 
+  @override
+  void initState() {
+    super.initState();
+    this.setCurrentLocation();
+    this.setPolyLines();
+    status = widget.ride.status;
+  }
+
   Completer<GoogleMapController> mapController = Completer();
   Set<Marker> markers = {};
 
   onMapCreated(GoogleMapController controller) async {
     mapController.complete(controller);
   }
+
+  String status;
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +54,44 @@ class _DriverRideDetailsState extends State<DriverRideDetails> {
           },
         ),
       ),
+      floatingActionButton: status == "COMPLETED" ? Container() : Container(
+          padding: EdgeInsets.only(right: 15, left: 50),
+          alignment: Alignment.bottomCenter,
+        child: status == "ACTIVE" ?
+        ActionButton(
+          text: "End ride",
+          onPressed: () async {
+            var json = jsonEncode({"status": "COMPLETED"});
+            var response = await put('${DRIVE_API_URL}/ride/${widget.ride.id}/status', headers: HEADERS, body: json);
+            print(response.statusCode);
+            setState(() {
+              this.status = "COMPLETED";
+            });
+          },
+        ) :
+        ActionButton(
+          text: "Start ride",
+          onPressed: () async {
+            var json = jsonEncode({"status": "ACTIVE"});
+            var response = await put('${DRIVE_API_URL}/ride/${widget.ride.id}/status', headers: HEADERS, body: json);
+            print(response.statusCode);
+            setState(() {
+              this.status = "ACTIVE";
+            });
+          },
+        ),
+      ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
             target: currentLocation ?? DEFAULT_LATLNG,
             zoom: 16
         ),
-        zoomControlsEnabled: true,
+        zoomControlsEnabled: false,
         zoomGesturesEnabled: true,
         myLocationEnabled: true,
         myLocationButtonEnabled: false,
         onMapCreated: onMapCreated,
-        //polylines: _polylines,
+        polylines: _polylines,
         markers: markers,
         mapType: MapType.normal,
 
@@ -58,7 +99,8 @@ class _DriverRideDetailsState extends State<DriverRideDetails> {
     );
   }
 
-  //var _polyLines =
+  Set<Polyline> _polylines = {};
+  List<LatLng> driverCoordinates;
 
   setPolyLines() async{
     var driverCoordinates = List<LatLng>();
@@ -84,6 +126,7 @@ class _DriverRideDetailsState extends State<DriverRideDetails> {
     var bd = await Util.getBitmapDescriptorFromIconData(Icons.accessibility);
 
     setState(() {
+      this.driverCoordinates = driverCoordinates;
       var driverPolyline = Polyline(
           polylineId: PolylineId("driverPoly"),
           color: Colors.red,
@@ -91,10 +134,38 @@ class _DriverRideDetailsState extends State<DriverRideDetails> {
           points: driverCoordinates
       );
 
-      /*_polylines.add(driverPolyline);
-      this.setMarkers();
-      this.setStartMarker(closestStartPoint, bd);*/
+      _polylines.add(driverPolyline);
+      this.setMarkers(bd);
     });
+  }
+
+  setMarkers(BitmapDescriptor bd) {
+    if(this.driverCoordinates != null) {
+      markers.add(Marker(
+          markerId: MarkerId("origin"),
+          position: this.driverCoordinates[0],
+          icon: bd
+      ));
+      markers.add(Marker(
+          markerId: MarkerId("dest"),
+          position: this.driverCoordinates.last
+      ));
+
+      for(var rideUser in widget.ride.rideUsers) {
+        if(rideUser.pickUpLocation?.coordinates != null) {
+          markers.add(Marker(
+              markerId: MarkerId("origin" + rideUser.id.toString()),
+              position: LatLng(rideUser.pickUpLocation.coordinates.latitude, rideUser.pickUpLocation.coordinates.longitude)
+          ));
+        }
+        if(rideUser.dropOffLocation?.coordinates != null) {
+          markers.add(Marker(
+              markerId: MarkerId("dest" + rideUser.id.toString()),
+              position: LatLng(rideUser.dropOffLocation.coordinates.latitude, rideUser.dropOffLocation.coordinates.longitude)
+          ));
+        }
+      }
+    }
   }
 
   LatLng currentLocation;
