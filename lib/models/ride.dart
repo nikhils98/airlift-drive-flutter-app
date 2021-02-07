@@ -19,17 +19,20 @@ class Ride {
   int fare;
   String status;
   List<User> currentPassengers;
+  num distance;
+  int passengerCount;
 
   Ride.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        origin = LocationDetails.fromJson(json['startLocation']),
-        destination = LocationDetails.fromJson(json['endLocation']),
+        origin = LocationDetails.fromJson({"coordinates": json['startLocation']["coordinates"], "name": json["startLocationName"]}),
+        destination = LocationDetails.fromJson({"coordinates": json['endLocation']["coordinates"], "name": json["endLocationName"]}),
         route = (json['route']['coordinates'] as List).map((e) => LocationDetails.fromJson({"coordinates": e})).toList(),
         startTime = DateTime.parse(json['startTime']),
-        endTime = json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
+        endTime = DateTime.parse(json['startTime']).add(Duration(seconds: int.parse(json['estimatedDuration']))),
+        distance = int.parse(json['distance']),
         maxPassengers = json['maxPassengers'],
         fare = json['perPassengerFare'],
         status = json['status'],
         driver = User.fromJson(json['driver']),
-        currentPassengers = null;//(json['currentPassengers'] as List).map((e) => User.fromJson(e)).toList();
+        passengerCount = json['passengerCount'];//(json['currentPassengers'] as List).map((e) => User.fromJson(e)).toList();
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:airlift_drive/common/google_map_constants.dart';
+import 'package:airlift_drive/common/util.dart';
 import 'package:airlift_drive/models/location_details.dart';
 import 'package:airlift_drive/ui/common/elevated_text_field.dart';
 import 'package:airlift_drive/ui/common/rides_list.dart';
@@ -55,9 +56,6 @@ class _SearchLocationState extends State<SearchLocation> {
   Set<Polyline> _polylines = {};
   // this will hold each polyline coordinate as Lat and Lng pairs
   List<LatLng> polylineCoordinates = [];
-  // this is the key object - the PolylinePoints
-  // which generates every polyline between start and finish
-  PolylinePoints polylinePoints = PolylinePoints();
 
   @override
   void initState() {
@@ -118,6 +116,7 @@ class _SearchLocationState extends State<SearchLocation> {
                         destination: selectedDestination,
                         distance: distance,
                         duration: duration,
+                        polyLineCoordinates: this.polylineCoordinates,
                       )
                 ));
               },
@@ -250,11 +249,14 @@ class _SearchLocationState extends State<SearchLocation> {
     );
   }
 
+  BitmapDescriptor bitmapDescriptor;
+
   setCurrentLocation() async {
     //var position = await Geolocator.getLastKnownPosition();
     //if(position == null)
     var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     var geocode = await geocoding.searchByLocation(Location(position.latitude, position.longitude));
+    this.bitmapDescriptor = await Util.getBitmapDescriptorFromIconData(Icons.accessibility);
     //print('${position.latitude}, ${position.longitude}, ${position.accuracy}');
     this.setState(() {
       /*this.markers.add(Marker(
@@ -278,7 +280,7 @@ class _SearchLocationState extends State<SearchLocation> {
       markers.add(Marker(
         markerId: sourceMarkerId,
         position: this.selectedOrigin.coordinates,
-        //icon: BitmapDescriptor
+        icon: this.bitmapDescriptor
       ));
     }
     if(this.selectedDestination.coordinates != null) {
@@ -353,6 +355,14 @@ class _SearchLocationState extends State<SearchLocation> {
           _polylines.add(polyline);
         });
       }
+    } else if (selectedOrigin.coordinates != null) {
+      (await mapController.future).animateCamera(CameraUpdate.newLatLng(
+          LatLng(this.selectedOrigin.coordinates.latitude, this.selectedOrigin.coordinates.longitude)
+      ));
+    } else if (selectedDestination.coordinates != null) {
+      (await mapController.future).animateCamera(CameraUpdate.newLatLng(
+          LatLng(this.selectedDestination.coordinates.latitude, this.selectedDestination.coordinates.longitude)
+      ));
     }
   }
 }

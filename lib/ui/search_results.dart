@@ -19,11 +19,13 @@ class SearchResults extends StatefulWidget {
     @required this.origin,
     @required this.destination,
     @required this.distance,
-    @required this.duration
+    @required this.duration,
+    @required this.polyLineCoordinates
   }): super(key: key);
 
   final LocationDetails origin, destination;
   final num distance, duration;
+  List<LatLng> polyLineCoordinates;
 
   @override
   _SearchResultsState createState() => _SearchResultsState();
@@ -74,9 +76,16 @@ class _SearchResultsState extends State<SearchResults> {
           this.rides == null ? Container(
               alignment: Alignment.center,
               child: CircularProgressIndicator()
-          ): Container(
+          ): this.rides.isEmpty ?
+              Container(
+                alignment: Alignment.center,
+                child: Text("No rides found near your locations"),
+              ) :
+          Container(
             padding: EdgeInsets.only(top: 130),
-              child: RidesList(rides: this.rides))
+              child: RidesList(rides: this.rides, origin: widget.origin,
+                destination: widget.destination, distance: widget.distance,
+                duration: widget.duration, polyLineCoordinates: widget.polyLineCoordinates,))
       ])
     );
   }
@@ -91,6 +100,8 @@ class _SearchResultsState extends State<SearchResults> {
     var json = jsonEncode({"startLocation": originArr, "endLocation": destinationArr});
     print(json);
     var response = await post(url, headers: HEADERS, body: json);
+
+    //var response = await get('${DRIVE_API_URL}/ride', headers: HEADERS);
     /*response.body = '['
         '{'
         '"id": 1, '
@@ -100,10 +111,12 @@ class _SearchResultsState extends State<SearchResults> {
         '"destination": "b"'
         '}'
         ']';*/
-    if(response.statusCode == 201 ) {
+    if(response.statusCode == 201 || response.statusCode == 200 ) {
       var body = jsonDecode(response.body);
       print(body);
       rides = (body as List).map((e) => Ride.fromJson(e)).toList();
+
+      //rides = rides.where((element) => element.startTime?.difference(DateTime.now())?.inHours != null && element.startTime.difference(DateTime.now()).inHours > 50).toList();
     }
     setState(() {
       this.rides = rides;

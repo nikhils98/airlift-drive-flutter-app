@@ -1,3 +1,4 @@
+import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/models/ride.dart';
 import 'package:airlift_drive/ui/common/common_drawer.dart';
 import 'package:airlift_drive/ui/common/elevated_text_field.dart';
@@ -24,14 +25,24 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add,),
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SearchLocation(
-                title: "Create a ride",
-                originTextFieldHint: "Search starting point",
-                isCreateRide: true,
-              ))
-          );
+          if(myInfo.carModel == null) {
+            showDialog(context: context, child:
+              AlertDialog(
+                title: Text("Please Enter Your Car Details"),
+                content: Icon(Icons.info, color: Colors.red, size: 30,)
+              )
+            );
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>
+                    SearchLocation(
+                      title: "Create a ride",
+                      originTextFieldHint: "Search starting point",
+                      isCreateRide: true,
+                    ))
+            );
+          }
         },
       ),
       body: Column(
@@ -49,6 +60,24 @@ class _HomeState extends State<Home> {
               readonly: true,
             )
           ),
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  alignment: Alignment.topLeft,
+                  child: Text("Rides scheduled by me"),
+                ),
+
+                Container(
+                  padding: EdgeInsets.all(10),
+                  alignment: Alignment.topLeft,
+                  child: Text("Rides joined by me"),
+                )
+              ],
+            ),
+          )
         ],
       ),
     );

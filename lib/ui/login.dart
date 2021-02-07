@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:airlift_drive/common/drive_api_constants.dart';
+import 'package:airlift_drive/models/user.dart';
 import 'package:airlift_drive/ui/common/action_button.dart';
 import 'package:airlift_drive/ui/home.dart';
 import 'package:airlift_drive/ui/register.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -62,17 +64,21 @@ class _LoginState extends State<Login> {
                           print(response.statusCode);
                           print(response.body);
 
-                          var responseBody = jsonDecode(response.body);
-                          authToken = responseBody['accessToken'];
+                          var json = jsonDecode(response.body);
+                          authToken = json['accessToken'];
+                          int id = json['userID'] as int;
 
-                          if(response.statusCode == 201) {
+                          response = await get('${DRIVE_API_URL}/user/${id}', headers: HEADERS);
+                          myInfo = User.fromJson(jsonDecode(response.body));
+
+                          if(response.statusCode == 200) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => Home())
                             );
                           }
                           else {
-                            Fluttertoast.showToast(msg: "Invalid email or password");
+                            Fluttertoast.showToast(msg: "Invalid email or password", toastLength: Toast.LENGTH_LONG);
                           }
                         },
                       )

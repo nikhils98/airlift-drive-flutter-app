@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:airlift_drive/common/drive_api_constants.dart';
 import 'package:airlift_drive/models/location_details.dart';
+import 'package:airlift_drive/ui/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -34,7 +35,7 @@ class _CreateRideState extends State<CreateRide> {
   String passengerPreference = "No preference";
   DateTime startDate;
   TimeOfDay startTime;
-  int maxPassengers;
+  int maxPassengers, perPassengerFare;
 
   var dateController = TextEditingController();
   var timeController = TextEditingController();
@@ -107,6 +108,7 @@ class _CreateRideState extends State<CreateRide> {
                             ),
                           ],
                         ),
+                        SizedBox(height: 50,),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           child: Row(
@@ -163,14 +165,32 @@ class _CreateRideState extends State<CreateRide> {
                             ],
                           ),
                         ),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                              labelText: 'Max number of passengers allowed'
-                          ),
-                          onSaved: (input) => this.maxPassengers = int.parse(input),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 160,
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                    labelText: 'Max passengers',
+                                ),
+                                onSaved: (input) => this.maxPassengers = int.parse(input),
+                              ),
+                            ),
+                            Container(
+                              width: 160,
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                    labelText: 'Per passenger fare'
+                                ),
+                                onSaved: (input) => this.perPassengerFare = int.parse(input),
+                              ),
+                            ),
+                          ],
                         ),
-                        Padding(
+                        /*Padding(
                           padding: const EdgeInsets.only(top: 15),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -196,7 +216,7 @@ class _CreateRideState extends State<CreateRide> {
                               ),
                             ],
                           ),
-                        )
+                        )*/
                       ],
                     ),
                   ),
@@ -219,10 +239,27 @@ class _CreateRideState extends State<CreateRide> {
                   coords.add(list);
                 }
 
-                var json = jsonEncode({"userId": 1, "route": coords, "maxPassengers": maxPassengers, "startTime": datetime.toIso8601String()});
+                var json = jsonEncode({"userId": myInfo.id, "route": coords,
+                  "maxPassengers": maxPassengers, "startTime": datetime.toIso8601String(),
+                  "perPassengerFare": perPassengerFare, "startLocationName": widget.origin.name,
+                  "endLocationName": widget.destination.name, "estimatedDuration": widget.duration,
+                  "distance": widget.distance
+                });
                 print(json);
                 var response = await post("$DRIVE_API_URL/ride", headers: HEADERS, body: json);
-                print(response.statusCode);
+                if(response.statusCode == 201) {
+                  showDialog(context: context, child:
+                    AlertDialog(
+                      title: Text("Ride Created"),
+                      content: Icon(Icons.info, color: Colors.green[600], size: 30),
+                    )
+                  );
+                  await Future.delayed(Duration(seconds: 1));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Home())
+                  );
+                }
               },),
             )
           ],
